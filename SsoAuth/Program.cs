@@ -1,16 +1,17 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
+using SsoAuth;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services
     .AddAuthentication(option =>
     {
         option.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        option.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+        option.DefaultChallengeScheme = "google";
     })
     .AddCookie(option =>
     {
@@ -21,24 +22,30 @@ builder.Services
             {
                 var identity = context.Principal.Identity as ClaimsIdentity;
 
-                if (identity.Claims.Any(c => (c.Type == ClaimTypes.NameIdentifier && c.Value == "nafis0014@gmail.com") || (c.Type == ClaimTypes.Email && c.Value == "nafis0014@gmail.com")))
+                var email = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+                if(!string.IsNullOrEmpty(email))
                 {
-                    identity.AddClaim(new Claim(ClaimTypes.Role, "Admin"));
-                }
-                else
-                {
-                    identity.AddClaim(new Claim(ClaimTypes.Role, "User"));
+                    var userService = context.HttpContext.RequestServices.GetService<IUserService>();
+                    var user = userService.GetUserByEmail(email);
+
+                    if(user != null)
+                    {
+                        identity.AddClaim(new Claim(ClaimTypes.Role, user.Role));
+                    }
                 }
 
                 await Task.CompletedTask;
             }
         };
     })
-    .AddGoogle(option =>
+    .AddOpenIdConnect("google", option =>
     {
+        option.Authority = "https://accounts.google.com";
         option.ClientId = "445005812065-tkfirfjcd290b2ih44jcm0c3jkrrpmv9.apps.googleusercontent.com";
         option.ClientSecret = "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";
         option.CallbackPath = "/auth";
+        option.Scope.Add("email");
     });
 
 var app = builder.Build();
