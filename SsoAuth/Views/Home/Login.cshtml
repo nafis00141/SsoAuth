@@ -1,0 +1,12 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    string? returnUrl = ViewData["ReturnUrl"] as string;
+}
+<h2>LogIn</h2>
+<form action="/login?returnUrl=@System.Net.WebUtility.UrlEncode(returnUrl)" method="post">
+  <input type="text" name="username" placeholder="UserName"/>
+  <input type="password" name="password" placeholder="Password" />
+  <input type="submit" value="login" />
+</form>
