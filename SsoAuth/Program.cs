@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using SsoAuth;
 using System.Security.Claims;
 
@@ -11,7 +12,7 @@ builder.Services
     .AddAuthentication(option =>
     {
         option.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        option.DefaultChallengeScheme = "google";
+        option.DefaultChallengeScheme = "okta";//GoogleDefaults.AuthenticationScheme;
     })
     .AddCookie(option =>
     {
@@ -24,17 +25,16 @@ builder.Services
 
                 var email = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-                if(!string.IsNullOrEmpty(email))
+                if (!string.IsNullOrEmpty(email))
                 {
                     var userService = context.HttpContext.RequestServices.GetService<IUserService>();
                     var user = userService.GetUserByEmail(email);
 
-                    if(user != null)
+                    if (user != null)
                     {
                         identity.AddClaim(new Claim(ClaimTypes.Role, user.Role));
                     }
                 }
-
                 await Task.CompletedTask;
             }
         };
@@ -45,6 +45,15 @@ builder.Services
         option.ClientId = "445005812065-tkfirfjcd290b2ih44jcm0c3jkrrpmv9.apps.googleusercontent.com";
         option.ClientSecret = "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";
         option.CallbackPath = "/auth";
+        option.Scope.Add("email");
+    })
+    .AddOpenIdConnect("okta", option =>
+    {
+        option.Authority = "https://dev-26993886.okta.com/oauth2/default";
+        option.ClientId = "0oa8kyd4r5UhcAKza5d7";
+        option.ClientSecret = "G6KhKimKQYJy9ioIFj_EuF8c4sCqzteoTxAwkF8s";
+        option.CallbackPath = "/okta-auth";
+        option.ResponseType = OpenIdConnectResponseType.Code;
         option.Scope.Add("email");
     });
 
