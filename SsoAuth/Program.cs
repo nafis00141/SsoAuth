@@ -12,7 +12,7 @@ builder.Services
     .AddAuthentication(option =>
     {
         option.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        option.DefaultChallengeScheme = "okta";//GoogleDefaults.AuthenticationScheme;
+        option.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     })
     .AddCookie(option =>
     {

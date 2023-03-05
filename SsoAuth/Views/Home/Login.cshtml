@@ -10,3 +10,7 @@
   <input type="password" name="password" placeholder="Password" />
   <input type="submit" value="login" />
 </form>
+<div>
+  <ul><a href="/login/google?returnUrl=@System.Net.WebUtility.UrlEncode(returnUrl)">Login With Google</ul>
+  <ul><a href="/login/okta?returnUrl=@System.Net.WebUtility.UrlEncode(returnUrl)">Login With Okta</ul>
+</div>

@@ -40,6 +40,19 @@ namespace SsoAuth.Controllers
       return View();
     }
 
+    [HttpGet("login/{provider}")]
+    public IActionResult LoginExternal([FromRoute] string provider, [FromQuery] string returnUrl)
+    {
+        if (User != null && User.Identities.Any(identity => identity.IsAuthenticated))
+        {
+            return RedirectToAction("", "Home");
+        }
+
+        returnUrl = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
+        var authenticationProperties = new AuthenticationProperties { RedirectUri = returnUrl };
+        return new ChallengeResult(provider, authenticationProperties);
+    }
+
     [HttpPost, Route("Login")]
     public async Task<IActionResult> Validate(string username, string password, string? returnUrl)
     {
